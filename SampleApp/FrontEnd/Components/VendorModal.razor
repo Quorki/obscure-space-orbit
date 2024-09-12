@@ -1,0 +1,52 @@
+@using BlazorBootstrap
+@using FrontEnd.Data
+
+<Modal @ref="modal">
+    <BodyTemplate>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Name :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputName" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Number :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputNumber" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">City :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputCity" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Vendor Group Id :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputVendorGroupId" /></div>
+        </div>
+    </BodyTemplate>
+    <FooterTemplate>
+         <Button Color="ButtonColor.Primary" @onclick="Order">Submit</Button>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Close</Button>
+    </FooterTemplate>
+</Modal>
+
+<Button Color="ButtonColor.Primary" @onclick="OnShowModalClick">Add Entry</Button>
+
+@code {
+    private Modal modal = default!;
+    [Parameter]  public EventCallback<string> ParentMethod { get; set; }
+    [Parameter] public string InputName { get; set; }
+    [Parameter] public string InputNumber {get; set; }
+    [Parameter] public string InputCity { get; set; }
+    [Parameter] public string InputVendorGroupId { get; set; }
+    private async Task OnShowModalClick()
+    {
+        await modal.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+    private async Task Order() {
+        string input = InputName + "/" + InputNumber + "/" + InputCity + "/" + InputVendorGroupId;
+        await ParentMethod.InvokeAsync(input);
+        await modal.HideAsync();
+    }
+}

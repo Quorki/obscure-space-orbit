@@ -1,0 +1,95 @@
+@page "/warehouses"
+@using FrontEnd.Data
+@using FrontEnd.Components
+@using System.Web
+
+<WarehouseModal ParentMethod="@Add" />
+<ConfirmDialog @ref="dialog" />
+
+<p>Warehouses</p>
+@if(warehouses == null) {
+    <p><em>Loading...</em></p>
+}
+else {
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>System Warehouse</th>
+                <th>Row Guid</th>
+                <th>Created By</th>
+                <th>Created At</th>
+                <th>Updated By</th>
+                <th>Updated At</th>
+                <th>Is Not Deleted</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var warehouse in warehouses) {
+                if(warehouse.IsNotDeleted == 1) {
+                    <tr>
+                        <td>@warehouse.Id</td>
+                        <td>@warehouse.Name</td>
+                        <td>@warehouse.Description</td>
+                        <td>@warehouse.SystemWarehouse</td>
+                        <td>@warehouse.RowGuid</td>
+                        <td>@warehouse.CreatedBy</td>
+                        <td>@warehouse.CreatedAtUtc</td>
+                        <td>@warehouse.UpdatedBy</td>
+                        <td>@warehouse.UpdatedAtUtc</td>
+                        <td>@warehouse.IsNotDeleted</td>
+                        <td><WarehouseEditModal ParentMethod="@Edit" Id="@warehouse.Id" InputName="@warehouse.Name" InputDescription="@warehouse.Description" InputSystemWarehouse="@warehouse.SystemWarehouse" InputRowGuid="@warehouse.RowGuid" /></td>
+                        <td><Button Color="ButtonColor.Danger" @onclick="() => ShowConfirmationAsync(warehouse.Id)" ><Icon Name="IconName.Trash" /></Button></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private ConfirmDialog dialog = default!;
+    private async Task ShowConfirmationAsync(int id)
+    {
+        var confirmation = await dialog.ShowAsync(
+            title: "Are you sure you want to delete this?",
+            message1: "This will delete the record. Once deleted can not be rolled back.",
+            message2: "Do you want to proceed?");
+
+        if (confirmation)
+        {
+            Delete(id);
+        }
+        else
+        {
+            
+        }
+    }
+    private List<Warehouse> warehouses;
+    WarehouseContext warehouseContext = new WarehouseContext();
+    protected override void OnInitialized() {
+        warehouses = warehouseContext.ReadWarehouses();
+    }
+
+    protected void Add(string input) {
+        string[] words = input.Split('/');
+        warehouseContext.AddWarehouse(words[0], words[1], words[2], words[3], words[4]);
+        warehouses = warehouseContext.ReadWarehouses();
+        StateHasChanged();
+    }
+
+    protected void Delete(int input) {
+        warehouseContext.DeleteWarehouse(input);
+        warehouses = warehouseContext.ReadWarehouses();
+        StateHasChanged();
+    }
+    protected void Edit(string input) {
+        string[] words = input.Split('/');
+        warehouseContext.EditWarehouse(Int32.Parse(words[0]), words[1], words[2], words[3], words[4], words[5]);
+        warehouses = warehouseContext.ReadWarehouses();
+        StateHasChanged();
+    }
+}

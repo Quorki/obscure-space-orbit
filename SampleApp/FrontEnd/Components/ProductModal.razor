@@ -1,0 +1,83 @@
+@using BlazorBootstrap
+@using FrontEnd.Data
+
+<Modal @ref="modal">
+    <BodyTemplate>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Name :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputName" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Number :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputNumber" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Description :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputDescription" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Unit Price :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputPrice" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Physical :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputPhysical" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Unit Measure :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputMeasure" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Product Group :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputProductGroup" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Row Guid :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputRowGuid" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Employee Id :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputEmployeeId" /></div>
+        </div>
+    </BodyTemplate>
+    <FooterTemplate>
+         <Button Color="ButtonColor.Primary" @onclick="Order">Submit</Button>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Close</Button>
+    </FooterTemplate>
+</Modal>
+
+<Button Color="ButtonColor.Primary" @onclick="OnShowModalClick">Add Entry</Button>
+
+@code {
+    private Modal modal = default!;
+    [Parameter]  public EventCallback<string> ParentMethod { get; set; }
+    private string? InputName { get; set; }
+    private string? InputNumber {get; set; }
+    private string? InputDescription { get; set; }
+    private string? InputPrice { get; set; }
+    private string? InputPhysical { get; set; }
+    private string? InputMeasure {get; set; }
+    private string? InputProductGroup { get; set; }
+    private string? InputRowGuid { get; set; }
+    private string? InputEmployeeId { get; set; }
+    private async Task OnShowModalClick()
+    {
+        await modal.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+    private async Task Order() {
+        string input = InputName + "/" + InputNumber + "/" + InputDescription
+        + "/" + InputPrice
+        + "/" + InputPhysical
+        + "/" + InputMeasure
+        + "/" + InputProductGroup
+        + "/" + InputRowGuid
+        + "/" + InputEmployeeId;
+        await ParentMethod.InvokeAsync(input);
+        await modal.HideAsync();
+    }
+}

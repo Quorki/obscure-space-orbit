@@ -1,47 +1,111 @@
 ﻿@page "/"
 @using FrontEnd.Data
-@inject WeatherForecastClient ForecastClient
+@using FrontEnd.Components
+@using System.Web
 
-<PageTitle>Weather forecast</PageTitle>
+<ProductModal ParentMethod="@Add" />
+<ConfirmDialog @ref="dialog" />
 
-<h1>Weather forecast</h1>
-
-<p>This component demonstrates fetching data from a service.</p>
-
-@if (forecasts == null)
+@if(products == null) 
 {
     <p><em>Loading...</em></p>
 }
-else
-{
+else {
     <table class="table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>
+                    <span class="sort-link" onclick="@(() => Order())">Id</span>
+                </th>
+                <th>Name</th>
+                <th>Number</th>
+                <th>Description</th>
+                <th>Unit Price</th>
+                <th>Physical</th>
+                <th>Unit Measure</th>
+                <th>Group Id</th>
+                <th>Row Guid</th>
+                <th>Created By</th>
+                <th>Created At Time</th>
+                <th>Updated By</th>
+                <th>Updated At Time</th>
+                <th>Is Not Deleted</th>
+                <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
+            @foreach (var product in products) //loops through products list and adds every entry into the table
             {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
+                @if(@product.IsNotDeleted == 1)
+                {
+                  <tr>
+                        <td>@product.Id</td>
+                        <td>@product.Name</td>
+                        <td>@product.Number</td>
+                        <td>@product.Description</td>
+                        <td>@product.UnitPrice</td>
+                        <td>@product.Physical</td>
+                        <td>@product.UnitMeasureId</td>
+                        <td>@product.UnitGroupId</td>
+                        <td>@product.RowGuid</td>
+                        <td>@product.CreatedByUserId</td>
+                        <td>@product.CreatedAtUtc</td>
+                        <td>@product.UpdatedByUserId</td>
+                        <td>@product.UpdatedAtUtc</td>
+                        <td>@product.IsNotDeleted</td>
+                        <td><EditModal ParentMethod="@Edit" Id="@product.Id" InputName="@product.Name" InputNumber="@product.Number" InputDescription="@product.Description" InputPrice="@product.UnitPrice.ToString()" InputPhysical="@product.Physical.ToString()" InputMeasure="@product.UnitMeasureId.ToString()" InputProductGroup="@product.UnitGroupId.ToString()" InputRowGuid="@product.RowGuid" /></td>
+                        <td><Button Color="ButtonColor.Danger" @onclick="() => ShowConfirmationAsync(product.Id)" ><Icon Name="IconName.Trash" /></Button></td>
+                    </tr>
+                }
             }
         </tbody>
     </table>
 }
-
 @code {
-    private WeatherForecast[]? forecasts;
-
-    protected override async Task OnInitializedAsync()
+    private ConfirmDialog dialog = default!;
+    private async Task ShowConfirmationAsync(int id)
     {
-        forecasts = await ForecastClient.GetForecastAsync(DateTime.Now);
+        var confirmation = await dialog.ShowAsync(
+            title: "Are you sure you want to delete this?",
+            message1: "This will delete the record. Once deleted can not be rolled back.",
+            message2: "Do you want to proceed?");
+
+        if (confirmation)
+        {
+            Delete(id);
+        }
+        else
+        {
+            
+        }
+    }
+    private List<Product> products = new List<Product>();
+    ProductContext productContext = new ProductContext();
+    protected override void OnInitialized() {
+        products = productContext.ReadProducts(); //generate the products list from the excel file
+    }
+
+    protected void Order() {
+       products.Reverse();
+       StateHasChanged();
+    }
+    protected void Add(string input) {
+        string[] words = input.Split('/');
+        productContext.AddProduct(words[0], words[1], words[2], words[3], words[4], words[5], words[6], words[7], words[8]);
+        products = productContext.ReadProducts();
+        StateHasChanged();
+    }
+    protected void Delete(int input) {
+        productContext.DeleteProduct(input);
+        products = productContext.ReadProducts();
+        StateHasChanged();
+    }
+
+    protected void Edit(string input) {
+        string[] words = input.Split('/');
+        productContext.EditProduct(Int32.Parse(words[0]), words[1], words[2], words[3], words[4], words[5], words[6], words[7], words[8], words[9]);
+        products = productContext.ReadProducts();
+        StateHasChanged();
     }
 }

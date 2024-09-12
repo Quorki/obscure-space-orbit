@@ -1,0 +1,57 @@
+@using BlazorBootstrap
+@using FrontEnd.Data
+
+<Modal @ref="modal">
+    <BodyTemplate>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Name :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputName" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Description :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputDescription" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">System Warehouse :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputSystemWarehouse" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Row Guid :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputRowGuid" /></div>
+        </div>
+        <div class="row pt-2">
+            <div class="col-6 col-md-4 text-end">Created By :</div>
+            <div class="col-6 col-md-8"><input @bind-value="InputCreatedBy" /></div>
+        </div>
+    </BodyTemplate>
+    <FooterTemplate>
+         <Button Color="ButtonColor.Primary" @onclick="Order">Submit</Button>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Close</Button>
+    </FooterTemplate>
+</Modal>
+
+<Button Color="ButtonColor.Primary" @onclick="OnShowModalClick">Add Entry</Button>
+
+@code {
+    private Modal modal = default!;
+    [Parameter]  public EventCallback<string> ParentMethod { get; set; }
+    [Parameter] public string InputName { get; set; }
+    [Parameter] public string InputDescription {get; set; }
+    [Parameter] public string InputSystemWarehouse { get; set; }
+    [Parameter] public string InputRowGuid { get; set; }
+    [Parameter] public string InputCreatedBy { get; set; }
+    private async Task OnShowModalClick()
+    {
+        await modal.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+    private async Task Order() {
+        string input = InputName + "/" + InputDescription + "/" + InputSystemWarehouse + "/" + InputRowGuid + "/" + InputCreatedBy;
+        await ParentMethod.InvokeAsync(input);
+        await modal.HideAsync();
+    }
+}
